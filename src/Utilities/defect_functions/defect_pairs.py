@@ -9,8 +9,12 @@ import pickle
 from scipy.stats import circmean, circstd, sem
 from joblib import Parallel, delayed
 
+import os
+path_to_append = os.path.dirname(os.path.realpath(__file__)) \
+    + '/../vasco_scripts'
+sys.path.append(path_to_append)
 
-sys.path.append('../vasco_scripts')  # add the relative path to the folder
+
 from defects import *  # import the module from the folder
 
 
