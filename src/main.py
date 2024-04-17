@@ -38,11 +38,11 @@ def compute_optical_flow(input_folder,
 
 
     # Scan the input folder and sort the images.
-    image_list = glob.glob(r + input_folder + "\*.tif")
+    image_list = glob.glob(input_folder + "/*.tif")
     image_list = natsorted(image_list, key=lambda y: y.lower())
 
     # Read to images and compute the optical flow.
-    im_num = 100
+    im_num = 0
     img1 = cv2.imread(image_list[im_num])[:,:,0]
     img2 = cv2.imread(image_list[im_num + 1])[:,:,0]
     flow = cv2.calcOpticalFlowFarneback(img1,img2,
@@ -68,7 +68,7 @@ def compute_optical_flow(input_folder,
     ax1.imshow(img_clahe, cmap="gray")  
 
     if save_figures:
-        fig.savefig(save_folder + "/raw.png",
+        fig.savefig(output_folder + "/raw.png",
                     bbox_inches=extent.expanded(1.15, 1.15))
 
         field = np.stack((flow[:,:,0], flow[:,:,1]), axis=-1)
@@ -108,3 +108,4 @@ def compute_optical_flow(input_folder,
         # if save_figures:
         #     fig.savefig(save_folder + "/flow_field.png",
         # bbox_inches=extent.expanded(1.15, 1.15))
+
