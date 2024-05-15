@@ -42,6 +42,7 @@ def compute_optical_flow(input_folder,
     image_list = natsorted(image_list, key=lambda y: y.lower())
 
     # Read to images and compute the optical flow.
+    print("DEBUG: ", input_folder)
     im_num = 0
     img1 = cv2.imread(image_list[im_num])[:,:,0]
     img2 = cv2.imread(image_list[im_num + 1])[:,:,0]
@@ -68,9 +69,6 @@ def compute_optical_flow(input_folder,
     ax1.imshow(img_clahe, cmap="gray")  
 
     if save_figures:
-        fig.savefig(output_folder + "/raw.png",
-                    bbox_inches=extent.expanded(1.15, 1.15))
-
         field = np.stack((flow[:,:,0], flow[:,:,1]), axis=-1)
         flow[:,:,0] = gaussian_filter(flow[:,:,0], sigma=15)
         flow[:,:,1] = gaussian_filter(flow[:,:,1], sigma=15)        
@@ -98,7 +96,9 @@ def compute_optical_flow(input_folder,
                    ul[::step, ::step], -vl[::step, ::step], 
                    color="r", scale=120, alpha=.8, width=.002, minlength=0)
 
-
+        fig.savefig(output_folder + "/raw.png",
+                    bbox_inches=extent.expanded(1.15, 1.15))
+        
         # speed = np.sqrt(flow[:,:,0]**2 + flow[:,:,0]**2)
         # lw = 3*speed / speed.max()
         # ax1.streamplot(x[::step, ::step],y[::step, ::step],
@@ -108,4 +108,6 @@ def compute_optical_flow(input_folder,
         # if save_figures:
         #     fig.savefig(save_folder + "/flow_field.png",
         # bbox_inches=extent.expanded(1.15, 1.15))
+
+
 
