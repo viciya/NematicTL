@@ -42,11 +42,10 @@ def compute_optical_flow(input_folder,
     image_list = natsorted(image_list, key=lambda y: y.lower())
 
     # Read to images and compute the optical flow.
-    print("DEBUG: ", input_folder)
     im_num = 0
     img1 = cv2.imread(image_list[im_num])[:,:,0]
     img2 = cv2.imread(image_list[im_num + 1])[:,:,0]
-    flow = cv2.calcOpticalFlowFarneback(img1,img2,
+    flow = cv2.calcOpticalFlowFarneback(img1, img2,
                                         None, 0.5, 3, 
                                         winsize = 15,
                                         iterations = 3,
@@ -66,7 +65,7 @@ def compute_optical_flow(input_folder,
     # ax1.imshow(img1, cmap="gray")
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     img_clahe = clahe.apply(img1)
-    ax1.imshow(img_clahe, cmap="gray")  
+    ax1.imshow(img_clahe, cmap="gray")
 
     if save_figures:
         field = np.stack((flow[:,:,0], flow[:,:,1]), axis=-1)
@@ -96,8 +95,8 @@ def compute_optical_flow(input_folder,
                    ul[::step, ::step], -vl[::step, ::step], 
                    color="r", scale=120, alpha=.8, width=.002, minlength=0)
 
-        fig.savefig(output_folder + "/raw.png",
-                    bbox_inches=extent.expanded(1.15, 1.15))
+        # fig.savefig(output_folder + "/raw.png",
+        #             bbox_inches=extent.expanded(1.15, 1.15))
         
         # speed = np.sqrt(flow[:,:,0]**2 + flow[:,:,0]**2)
         # lw = 3*speed / speed.max()
@@ -109,5 +108,42 @@ def compute_optical_flow(input_folder,
         #     fig.savefig(save_folder + "/flow_field.png",
         # bbox_inches=extent.expanded(1.15, 1.15))
 
+        fig.savefig(output_folder + "/raw.png",
+                    bbox_inches=extent.expanded(1.15, 1.15))
 
+
+
+
+def defects_analysis(input_folder,
+                     output_folder,
+                     save_figures = True):
+
+    # Scan the input folder and sort the images.
+    image_list = glob.glob(input_folder + "/*.tif")
+    image_list = natsorted(image_list, key=lambda y: y.lower())
+
+    im_num = 0
+    fig, ax1 = plt.subplots(1,1,  figsize=(8,8))
+
+    ax1.clear(); ax1.axis('off') 
+    
+    imgR = cv2.imread(image_list[im_num])[:,:900,0]
+    imgL = cv2.imread(image_list[im_num])[:,900:,0]
+    y, x = np.mgrid[0:imgR.shape[0], 0:imgR.shape[1]]
+
+    sigma = 11
+    oriR, plusR, minR = analyze_defects(imgR, sigma=sigma)
+    oriL, plusL, minL = analyze_defects(imgL, sigma=sigma)
+    s = 20
+    ax1.imshow(np.zeros_like(imgR, dtype=np.float32), cmap="gray")
+    for color,alpha, ori in zip(["c","m"],[1,.5], [oriL,oriR]):
+        ax1.quiver(x[::s,::s], y[::s,::s],
+                   np.cos(ori)[::s,::s], np.sin(ori)[::s,::s], 
+                   headaxislength=0, headwidth=0, headlength=0, width=.01, 
+                   color=color, scale=35, pivot='mid', alpha=alpha)
+    
+    plt.gca().set_box_aspect(1)
+    fig.savefig(output_folder + "/LR direction quiver.svg")
+
+    
 
