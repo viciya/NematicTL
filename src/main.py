@@ -108,9 +108,9 @@ def compute_optical_flow(input_folder,
         #     fig.savefig(save_folder + "/flow_field.png",
         # bbox_inches=extent.expanded(1.15, 1.15))
 
-        fig.savefig(output_folder + "/raw.png",
-                    bbox_inches=extent.expanded(1.15, 1.15))
-
+        if save_figures:
+            fig.savefig(output_folder + "/raw.png",
+                        bbox_inches=extent.expanded(1.15, 1.15))
 
 
 
@@ -143,7 +143,51 @@ def defects_analysis(input_folder,
                    color=color, scale=35, pivot='mid', alpha=alpha)
     
     plt.gca().set_box_aspect(1)
-    fig.savefig(output_folder + "/LR direction quiver.svg")
+
+    if save_figures:
+        fig.savefig(output_folder + "/LR direction quiver.svg")
+
+
+
+def plot_velocity_field(input_folder,
+                        output_folder,
+                        save_figures = True):
+
+    # Scan the input folder and sort the images.
+    image_list = glob.glob(input_folder + "/*.tif")
+    image_list = natsorted(image_list, key=lambda y: y.lower())
+
+    im_num = 0
+    fig, ax1 = plt.subplots(1,1,  figsize=(8,8))
+
+    s = 25 
+    imgR1 = cv2.imread(image_list[im_num])[:,:900,0]
+    imgL1 = cv2.imread(image_list[im_num])[:,900:,0]
+    imgR2 = cv2.imread(image_list[im_num+1])[:,:900,0]
+    imgL2 = cv2.imread(image_list[im_num+1])[:,900:,0]
+
+    ax1.clear(); ax1.axis('off') 
+    ax1.imshow(np.zeros_like(imgR1, dtype=np.float32), cmap="gray")
+
+    for color, img1,img2 in zip(["r","g"],[imgL1,imgR1],[imgL2,imgR2]):
+        flow = cv2.calcOpticalFlowFarneback(img1,img2, None, 0.5, 3, 
+                                            winsize=15, iterations=3,
+                                            poly_n=5, poly_sigma=1.2,
+                                            flags=0) 
+        flow[:,:,0] = gaussian_filter(flow[:,:,0], sigma=15)
+        flow[:,:,1] = gaussian_filter(flow[:,:,1], sigma=15)
+    
+        y, x = np.mgrid[0:img1.shape[0], 0:img1.shape[1]]    
+
+        ax1.quiver(x[::s, ::s], y[::s, ::s], 
+                   flow[::s, ::s, 0], -flow[::s, ::s, 1], 
+                   color=color, scale=50, alpha=.8,
+                   width=.005, minlength=0)  
+    
+    plt.gca().set_box_aspect(1) 
+
+    if save_figures:
+        fig.savefig(output_folder + "/LR velocity quiver.svg")
 
     
 
