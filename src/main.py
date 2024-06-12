@@ -40,7 +40,7 @@ def compute_optical_flow(input_folder,
     # Scan the input folder and sort the images.
     image_list = glob.glob(input_folder + "/*.tif")
     image_list = natsorted(image_list, key=lambda y: y.lower())
-
+        
     # Read to images and compute the optical flow.
     im_num = 0
     img1 = cv2.imread(image_list[im_num])[:,:,0]
@@ -109,8 +109,12 @@ def compute_optical_flow(input_folder,
         # bbox_inches=extent.expanded(1.15, 1.15))
 
         if save_figures:
-            fig.savefig(output_folder + "/raw.png",
+            fig.savefig(output_folder + "/optical_flow.png",
                         bbox_inches=extent.expanded(1.15, 1.15))
+
+    # Clean up.
+    del img1
+    del img2
 
 
 
@@ -126,9 +130,15 @@ def defects_analysis(input_folder,
     fig, ax1 = plt.subplots(1,1,  figsize=(8,8))
 
     ax1.clear(); ax1.axis('off') 
+
+    # Retrieve the image dimensions.
+    img_test = cv2.imread(image_list[im_num])[:,:,0]
+    sizeX = img_test.shape[0]
+    sizeY = img_test.shape[0]
+    del img_test
     
-    imgR = cv2.imread(image_list[im_num])[:,:900,0]
-    imgL = cv2.imread(image_list[im_num])[:,900:,0]
+    imgR = cv2.imread(image_list[im_num])[:,:sizeX,0]
+    imgL = cv2.imread(image_list[im_num])[:,sizeX:,0]
     y, x = np.mgrid[0:imgR.shape[0], 0:imgR.shape[1]]
 
     sigma = 11
@@ -147,6 +157,10 @@ def defects_analysis(input_folder,
     if save_figures:
         fig.savefig(output_folder + "/LR direction quiver.svg")
 
+    # Clean up.
+    del imgR
+    del imgL
+
 
 
 def plot_velocity_field(input_folder,
@@ -160,11 +174,18 @@ def plot_velocity_field(input_folder,
     im_num = 0
     fig, ax1 = plt.subplots(1,1,  figsize=(8,8))
 
-    s = 25 
-    imgR1 = cv2.imread(image_list[im_num])[:,:900,0]
-    imgL1 = cv2.imread(image_list[im_num])[:,900:,0]
-    imgR2 = cv2.imread(image_list[im_num+1])[:,:900,0]
-    imgL2 = cv2.imread(image_list[im_num+1])[:,900:,0]
+    s = 25
+
+    # Retrieve the image dimensions.
+    img_test = cv2.imread(image_list[im_num])[:,:,0]
+    sizeX = img_test.shape[0]
+    sizeY = img_test.shape[0]
+    del img_test
+
+    imgR1 = cv2.imread(image_list[im_num])[:,:sizeX,0]
+    imgL1 = cv2.imread(image_list[im_num])[:,sizeX:,0]
+    imgR2 = cv2.imread(image_list[im_num+1])[:,:sizeX,0]
+    imgL2 = cv2.imread(image_list[im_num+1])[:,sizeX:,0]
 
     ax1.clear(); ax1.axis('off') 
     ax1.imshow(np.zeros_like(imgR1, dtype=np.float32), cmap="gray")
@@ -189,5 +210,10 @@ def plot_velocity_field(input_folder,
     if save_figures:
         fig.savefig(output_folder + "/LR velocity quiver.svg")
 
-    
+    # Clean up.
+    del imgR1
+    del imgL1
+    del imgR2
+    del imgL2
 
+    
