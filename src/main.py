@@ -93,10 +93,17 @@ def imagepair_to_votrex_area(img1, img2, sigma=35):
 
 
 def time_average(img_list1, img_list2):
+
+    # Retrieve the image dimensions.
+    img_test = cv2.imread(img_list1[0])[:,:,0]
+    sizeX = img_test.shape[0]
+    sizeY = img_test.shape[0]
+    del img_test
+    
     flows = []
     for im1, im2 in zip(img_list1, img_list2):
-        img1 = cv2.imread(im1)[:,900:,0]
-        img2 = cv2.imread(im2)[:,900:,0]
+        img1 = cv2.imread(im1)[:,sizeX:,0]
+        img2 = cv2.imread(im2)[:,sizeX:,0]
         flows.append(
             cv2.calcOpticalFlowFarneback(img1,img2, None, 0.5, 3, 
             winsize=15, iterations=3, poly_n=5, poly_sigma=1.2, flags=0) 
@@ -318,8 +325,16 @@ def compute_okubo_weiss_field(input_folder,
     
     sigma = 35
     im_num = 0
-    img1 = cv2.imread(image_list[im_num])[:,900:,0]
-    # img2 = cv2.imread(image_list[im_num+1])[:,900:,0]
+
+    # Retrieve the image dimensions.
+    img_test = cv2.imread(image_list[im_num])[:,:,0]
+    sizeX = img_test.shape[0]
+    sizeY = img_test.shape[0]
+    del img_test
+
+    
+    img1 = cv2.imread(image_list[im_num])[:,sizeX:,0]
+    # img2 = cv2.imread(image_list[im_num+1])[:,sizeX:,0]
     # flow = cv2.calcOpticalFlowFarneback(img1,img2, None, 0.5, 3, 
     #     winsize=15, iterations=3, poly_n=5, poly_sigma=1.2, flags=0) 
 
